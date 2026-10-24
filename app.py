@@ -156,8 +156,8 @@ def ver_capitulo(capitulo_id):
         t = temporada.numero
         c = capitulo.numero
         reproductores["Subtitulado Opc1"] = f"https://vidsrc.sh/embed/tv/{tmdb}/{t}/{c}"
-        reproductores["Subtitulado Opc2"] = f"https://vidrock.net/tv/{tmdb_id}/{tmdb}/{t}/{c}"
-        reproductores["Subtitulado Opc2"] = f"https://vidfast.vc/tv/{tmdb}/{t}/{c}?autoPlay=true"
+        reproductores["Subtitulado Opc2"] = f"https://vidrock.net/tv/{tmdb}/{t}/{c}"
+        reproductores["Subtitulado Opc3"] = f"https://vidfast.vc/tv/{tmdb}/{t}/{c}?autoPlay=true"
 
     return render_template('ver_capitulo.html', capitulo=capitulo, temporada=temporada, serie=serie, reproductores=reproductores)
 
