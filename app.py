@@ -23,9 +23,6 @@ login_manager.init_app(app)
 from models import Usuario, Pelicula, Serie, Temporada, Capitulo
 
 
-@app.route('/ping', methods=['GET', 'HEAD'])
-def ping():
-    return 'OK', 200
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -34,13 +31,17 @@ def load_user(user_id):
 
 
 # --- RUTA 0: Login Falso (Vista Inicial) ---
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        # Permite cualquier dato ingresado y marca la sesión como activa
-        session['autenticado'] = True
-        return redirect(url_for('index'))
-    return render_template('login.html')
+@app.before_request
+def requerir_login():
+    # Incluimos 'ping' para que cron-job.org pueda acceder sin autenticación
+    rutas_libres = ['login', 'static', 'ping']
+    if request.endpoint and request.endpoint not in rutas_libres:
+        if not session.get('autenticado'):
+            return redirect(url_for('login'))
+
+@app.route('/ping', methods=['GET', 'HEAD'])
+def ping():
+    return 'OK', 200
 
 @app.route('/logout')
 def logout():
@@ -92,20 +93,20 @@ def detalle_pelicula(pelicula_id):
     
     # Fuentes personalizadas de la base de datos (solo si tienen contenido)
     if hasattr(pelicula, 'url') and pelicula.url and pelicula.url.strip():
-        reproductores["Opción Principal"] = pelicula.url.strip()
+        reproductores["Latino Opc1"] = pelicula.url.strip()
         
     if hasattr(pelicula, 'url_extra') and pelicula.url_extra and pelicula.url_extra.strip():
-        reproductores["Opción Secundaria"] = pelicula.url_extra.strip()
+        reproductores["Latino Opc2"] = pelicula.url_extra.strip()
         
     if hasattr(pelicula, 'url_respaldo') and pelicula.url_respaldo and pelicula.url_respaldo.strip():
-        reproductores["Opción Respaldo"] = pelicula.url_respaldo.strip()
+        reproductores["Latino Opc3"] = pelicula.url_respaldo.strip()
         
     # Opciones de APIs externas si tiene TMDB ID
     if pelicula.tmdb_id:
         tmdb = pelicula.tmdb_id
-        reproductores["VidSrc (API)"] = f"https://vidsrc.xyz/embed/movie?tmdb={tmdb}"
-        reproductores["VidFast"] = f"https://vidfast.pro/embed/movie/{tmdb}"
-        reproductores["VidRock"] = f"https://vidrock.net/embed/movie/{tmdb}"
+        reproductores["Subtitulado Opc1"] = f"https://vidsrc.sh/embed/movie/{tmdb}"
+        reproductores["Subtitulado Opc2"] = f"https://vidrock.net/movie/{tmdb}"
+        reproductores["Subtitulado Opc3"] = f"https://vidfast.vc/movie/{tmdb}"
         
     return render_template('detalle_pelicula.html', pelicula=pelicula, reproductores=reproductores)
 
@@ -131,21 +132,22 @@ def ver_capitulo(capitulo_id):
     
     # Fuentes personalizadas del capítulo (solo si tienen contenido)
     if hasattr(capitulo, 'url') and capitulo.url and capitulo.url.strip():
-        reproductores["Opción Principal"] = capitulo.url.strip()
+        reproductores["Latino Opc1"] = capitulo.url.strip()
         
     if hasattr(capitulo, 'url_extra') and capitulo.url_extra and capitulo.url_extra.strip():
-        reproductores["Opción Secundaria"] = capitulo.url_extra.strip()
+        reproductores["Latino Opc2"] = capitulo.url_extra.strip()
         
     if hasattr(capitulo, 'url_respaldo') and capitulo.url_respaldo and capitulo.url_respaldo.strip():
-        reproductores["Opción Respaldo"] = capitulo.url_respaldo.strip()
+        reproductores["Latino Opc3"] = capitulo.url_respaldo.strip()
         
     # Opciones de APIs externas por serie/temporada/episodio
     if serie.tmdb_id:
         tmdb = serie.tmdb_id
         t = temporada.numero
         c = capitulo.numero
-        reproductores["VidSrc (TV)"] = f"https://vidsrc.xyz/embed/tv?tmdb={tmdb}&season={t}&episode={c}"
-        reproductores["VidFast (TV)"] = f"https://vidfast.pro/embed/tv/{tmdb}/{t}/{c}"
+        reproductores["Subtitulado Opc1"] = f"https://vidsrc.sh/embed/tv/{tmdb}/{t}/{c}"
+        reproductores["Subtitulado Opc2"] = f"https://vidrock.net/tv/{tmdb_id}/{tmdb}/{t}/{c}"
+        reproductores["Subtitulado Opc2"] = f"https://vidfast.vc/tv/{tmdb}/{t}/{c}?autoPlay=true"
 
     return render_template('ver_capitulo.html', capitulo=capitulo, temporada=temporada, serie=serie, reproductores=reproductores)
 
