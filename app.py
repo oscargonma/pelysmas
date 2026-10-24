@@ -40,6 +40,12 @@ def requerir_login():
             # Si tu función de login no se llama 'login', ajusta el endpoint aquí también
             return redirect(url_for('login'))
 
+# 1. Definición de la ruta para el cronjob
+@app.route('/ping', methods=['GET', 'HEAD'])
+def ping():
+    return 'OK', 200
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():  # <- El nombre de esta función debe coincidir con url_for('login')
     if request.method == 'POST':
