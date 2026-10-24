@@ -23,6 +23,10 @@ login_manager.init_app(app)
 from models import Usuario, Pelicula, Serie, Temporada, Capitulo
 
 
+@app.route('/ping', methods=['GET', 'HEAD'])
+def ping():
+    return 'OK', 200
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(Usuario, int(user_id))
@@ -144,6 +148,27 @@ def ver_capitulo(capitulo_id):
         reproductores["VidFast (TV)"] = f"https://vidfast.pro/embed/tv/{tmdb}/{t}/{c}"
 
     return render_template('ver_capitulo.html', capitulo=capitulo, temporada=temporada, serie=serie, reproductores=reproductores)
+
+@app.route('/buscar')
+def buscar():
+    query = request.args.get('q', '').strip()
+    
+    if not query:
+        return redirect(url_for('index'))
+    
+    # 1. Buscar en la tabla/modelo de Películas (ejemplo con SQLAlchemy)
+    resultados_peliculas = Pelicula.query.filter(Pelicula.titulo.ilike(f'%{query}%')).all()
+    
+    # 2. Buscar en la tabla/modelo de Series
+    resultados_series = Serie.query.filter(Serie.titulo.ilike(f'%{query}%')).all()
+    
+    # 3. Renderizar la plantilla enviando ambas listas
+    return render_template(
+        'buscar.html', 
+        query=query, 
+        peliculas=resultados_peliculas, 
+        series=resultados_series
+    )
 
 
 # Contexto para crear tablas limpias

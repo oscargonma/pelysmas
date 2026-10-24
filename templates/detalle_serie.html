@@ -7,220 +7,158 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #080808; color: #fff; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 70px; }
-        .navbar { border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .navbar-brand { color: #dc3545; font-weight: 900; letter-spacing: 1px; }
+        :root {
+            --bg-body: #070709;
+            --primary-red: #ff0520;
+            --primary-glow: rgba(255, 5, 32, 0.45);
+            --text-main: #f5f5f7;
+            --text-dim: #8e8e93;
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            padding-bottom: 90px; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .navbar-custom {
+            background: rgba(7, 7, 9, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky; top: 0; z-index: 1030; padding: 14px 0;
+        }
+        .navbar-brand { color: var(--primary-red); font-weight: 900; letter-spacing: 2px; font-size: 1.5rem; text-shadow: 0 0 12px var(--primary-glow); }
+        .nav-pill-btn { color: var(--text-dim); font-weight: 600; font-size: 0.9rem; padding: 8px 18px; border-radius: 30px; text-decoration: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-pill-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+
+        .search-box-pc { position: relative; max-width: 300px; width: 100%; }
+        .search-box-pc .form-control { background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; color: #fff; padding: 9px 18px 9px 42px; font-size: 0.85rem; }
+        .search-box-pc .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
 
         .backdrop-section {
             position: relative;
-            background: linear-gradient(to bottom, rgba(8,8,8,0.85), rgba(8,8,8,0.98)), url('{{ serie.backdrop_url or serie.backdrop or serie.poster_url }}');
+            background: linear-gradient(to bottom, rgba(7,7,9,0.75) 0%, rgba(7,7,9,0.98) 80%), url('{{ serie.backdrop_url or serie.backdrop or serie.poster_url }}');
             background-size: cover;
             background-position: center;
             flex: 1;
             padding-bottom: 60px;
         }
         .poster-detalles {
-            width: 100%;
-            max-width: 240px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .meta-info {
-            color: #ffffff !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-            font-weight: 500;
+            width: 100%; max-width: 250px; border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.12);
         }
 
         /* Selector de Temporadas */
-        .select-season-wrapper {
-            max-width: 300px;
-        }
         .select-season-wrapper select {
-            background-color: #ffc107;
-            color: #000000;
-            border: 1px solid #ffcd39;
-            border-radius: 6px;
-            padding: 8px 36px 8px 16px;
-            font-weight: 800;
-            cursor: pointer;
-            min-width: 160px;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
-            transition: all 0.2s ease;
+            background-color: var(--primary-red); color: #fff; border: none;
+            border-radius: 25px; padding: 8px 36px 8px 16px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
 
-        .select-season-wrapper select:hover,
-        .select-season-wrapper select:focus {
-            background-color: #ffca2c;
-            color: #000000;
-            border-color: #ffe066;
-            box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
-            outline: none;
-        }
-
-        .select-season-wrapper select.form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-        }
-
-        .select-season-wrapper select option {
-            background-color: #161a23;
-            color: #ffffff;
-        }
-
-        /* Tarjeta de Episodio estilo Cuevana */
-        .episode-card {
-            background-color: transparent;
-            text-decoration: none;
-            color: #fff;
-            display: block;
-            transition: transform 0.2s ease;
-        }
-        .episode-card:hover {
-            transform: translateY(-4px);
-            color: #fff;
-        }
+        /* Tarjeta de Capítulo */
+        .episode-card { background-color: transparent; text-decoration: none; color: #fff; display: block; transition: transform 0.3s ease; }
+        .episode-card:hover { transform: translateY(-6px); color: #fff; }
         .episode-thumbnail-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            border-radius: 8px;
-            overflow: hidden;
-            background-color: #181818;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 12px;
+            overflow: hidden; background-color: #111116; border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.5);
         }
-        .episode-thumbnail-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.3s ease;
-        }
+        .episode-thumbnail-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .episode-card:hover .episode-thumbnail-wrapper img { transform: scale(1.08); }
         .episode-badge {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background-color: #0d6efd;
-            color: #fff;
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: absolute; bottom: 8px; right: 8px; background-color: var(--primary-red);
+            color: #fff; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px;
+            box-shadow: 0 2px 8px var(--primary-glow);
         }
         .episode-play-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;
         }
-        .episode-card:hover .episode-play-overlay {
-            opacity: 1;
-        }
+        .episode-card:hover .episode-play-overlay { opacity: 1; }
         .play-icon-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 1.2rem;
-            padding-left: 3px;
+            width: 46px; height: 46px; border-radius: 50%; background: var(--primary-red);
+            display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.3rem;
+            box-shadow: 0 0 15px var(--primary-glow);
         }
-        .episode-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 8px;
-            margin-bottom: 2px;
-            color: #3b82f6;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .episode-card:hover .episode-title {
-            color: #60a5fa;
-        }
-        .episode-date {
-            font-size: 0.75rem;
-            color: #888;
-        }
+        .episode-title { font-size: 0.88rem; font-weight: 700; margin-top: 10px; color: #fff; }
 
-        /* Menú inferior móvil */
         .mobile-bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background-color: #121212;
-            border-top: 1px solid #222;
-            z-index: 1000;
-            padding: 8px 0;
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(10, 10, 14, 0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08); z-index: 1000; padding: 12px 0;
         }
-        @media (max-width: 768px) {
-            .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; }
-        }
-        .mobile-nav-item { color: #888; text-align: center; text-decoration: none; font-size: 0.75rem; }
-        .mobile-nav-item.active, .mobile-nav-item:hover { color: #dc3545; }
-        .mobile-nav-item i { display: block; font-size: 1.25rem; }
+        @media (max-width: 768px) { .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; } }
+        .mobile-nav-item { color: var(--text-dim); text-align: center; text-decoration: none; font-size: 0.72rem; font-weight: 600; border: none; background: none; }
+        .mobile-nav-item.active, .mobile-nav-item:hover { color: var(--primary-red); }
+        .mobile-nav-item i { display: block; font-size: 1.3rem; margin-bottom: 2px; }
 
-        footer { background-color: #050505; border-top: 1px solid #1a1a1a; color: #777; padding: 25px 0; text-align: center; font-size: 0.85rem; }
+        .modal-search-content { background-color: var(--bg-body); border: 1px solid rgba(255, 255, 255, 0.1); }
+        footer { background-color: #030304; border-top: 1px solid rgba(255, 255, 255, 0.05); color: var(--text-dim); padding: 35px 0; text-align: center; font-size: 0.82rem; }
     </style>
 </head>
 <body>
 
-    <!-- Navbar Superior -->
-    <nav class="navbar navbar-dark bg-black px-3">
+    <!-- Navbar PC -->
+    <nav class="navbar navbar-expand-md navbar-dark navbar-custom px-3 mb-4">
         <div class="container">
-            <a class="navbar-brand fs-4" href="{{ url_for('index') }}">🎬 RETROMEDIA</a>
-            <div class="d-none d-md-flex gap-4 align-items-center">
-                <a href="{{ url_for('index') }}" class="text-white text-decoration-none">Películas</a>
-                <a href="{{ url_for('series') }}" class="text-white text-decoration-none">Series</a>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+                <i class="bi bi-play-circle-fill"></i> RETROMEDIA
+            </a>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="d-flex align-items-center me-auto ms-md-4 gap-2">
+                    <a href="{{ url_for('index') }}" class="nav-pill-btn"><i class="bi bi-film me-1"></i> Películas</a>
+                    <a href="{{ url_for('series') }}" class="nav-pill-btn active"><i class="bi bi-tv me-1"></i> Series</a>
+                </div>
+                <form action="{{ url_for('buscar') }}" method="GET" class="d-none d-md-flex align-items-center ms-auto search-box-pc">
+                    <input class="form-control" type="search" name="q" placeholder="Buscar en el catálogo..." aria-label="Buscar" autocomplete="off" value="{{ request.args.get('q', '') if request else '' }}">
+                    <i class="bi bi-search search-icon"></i>
+                </form>
             </div>
         </div>
     </nav>
 
-    <!-- Contenedor Principal con Backdrop -->
-    <div class="backdrop-section pt-4">
+    <!-- Detalles de la Serie -->
+    <div class="backdrop-section pt-3">
         <div class="container">
-            <a href="{{ url_for('series') }}" class="btn btn-outline-light btn-sm mb-4 rounded-pill px-3">← Volver a Series</a>
+            <a href="{{ url_for('series') }}" class="btn btn-outline-light btn-sm mb-4 rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i> Volver a Series</a>
 
-            <!-- Metadatos de la Serie -->
             <div class="row align-items-center mb-5">
                 <div class="col-md-3 col-lg-2 text-center text-md-start mb-3 mb-md-0">
                     <img src="{{ serie.poster_url }}" class="poster-detalles" alt="{{ serie.titulo }}">
                 </div>
-                <div class="col-md-9 col-lg-10">
+                <div class="col-md-9 col-lg-10 ps-md-4">
                     <h1 class="fw-bold display-5 text-white mb-2" style="text-shadow: 0 2px 6px rgba(0,0,0,0.8);">{{ serie.titulo }}</h1>
                     
-                    <div class="d-flex flex-wrap gap-3 align-items-center mb-3 meta-info fs-6">
+                    <div class="d-flex flex-wrap gap-3 align-items-center mb-3 text-white fs-6">
                         {% if serie.calificacion %}
-                            <span class="badge bg-warning text-dark fw-bold px-2 py-1">⭐ {{ serie.calificacion }}</span>
+                            <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="bi bi-star-fill me-1"></i>{{ serie.calificacion }}</span>
                         {% endif %}
                         {% if serie.anio %}
-                            <span><i class="bi bi-calendar-event me-1"></i> {{ serie.anio }}</span>
+                            <span><i class="bi bi-calendar-event me-1 text-danger"></i> {{ serie.anio }}</span>
                         {% endif %}
                         {% if serie.genero %}
-                            <span><i class="bi bi-film me-1"></i> {{ serie.genero }}</span>
+                            <span><i class="bi bi-film me-1 text-danger"></i> {{ serie.genero }}</span>
                         {% endif %}
                     </div>
 
-                    <p class="lead text-light fs-6" style="line-height: 1.6; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">
+                    <p class="lead text-light fs-6" style="line-height: 1.7; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">
                         {{ serie.sinopsis or 'Sin sinopsis disponible para esta serie.' }}
                     </p>
                 </div>
             </div>
 
-            <!-- Selector de Temporadas y Grid de Capítulos estilo Cuevana -->
+            <!-- Selector de Temporada y Episodios -->
             <div class="row">
                 <div class="col-12">
                     {% if serie.temporadas %}
-                        <!-- Header del Selector -->
                         <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
-                            <span class="fw-bold text-white fs-5">Selector Temporada</span>
+                            <span class="fw-bold text-white fs-5">Temporada:</span>
                             <div class="select-season-wrapper">
                                 <select class="form-select" id="seasonSelect" onchange="cambiarTemporada(this.value)">
                                     {% for temporada in serie.temporadas %}
@@ -232,15 +170,13 @@
                             </div>
                         </div>
 
-                        <!-- Contenedores de Episodios por Temporada -->
                         {% for temporada in serie.temporadas %}
                             <div class="season-container {% if not loop.first %}d-none{% endif %}" id="season-{{ temporada.id }}">
-                                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+                                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 g-md-4">
                                     {% for capitulo in temporada.capitulos %}
                                         <div class="col">
                                             <a href="{{ url_for('ver_capitulo', capitulo_id=capitulo.id) }}" class="episode-card">
                                                 <div class="episode-thumbnail-wrapper">
-                                                    <!-- Lógica condicional estricta para resolver URLs de TMDB o Fallback de Serie -->
                                                     {% if capitulo.backdrop and capitulo.backdrop != None and capitulo.backdrop != '' %}
                                                         {% if capitulo.backdrop.startswith('http') %}
                                                             <img src="{{ capitulo.backdrop }}" alt="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
@@ -260,17 +196,12 @@
 
                                                     <div class="episode-badge">{{ temporada.numero }}x{{ capitulo.numero }}</div>
                                                     <div class="episode-play-overlay">
-                                                        <div class="play-icon-circle">
-                                                            <i class="bi bi-play-fill"></i>
-                                                        </div>
+                                                        <div class="play-icon-circle"><i class="bi bi-play-fill"></i></div>
                                                     </div>
                                                 </div>
-                                                <div class="episode-title" title="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                <div class="episode-title text-truncate" title="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
                                                     Episodio {{ capitulo.numero }} ({{ temporada.numero }}x{{ capitulo.numero }})
                                                 </div>
-                                                {% if capitulo.fecha_estreno %}
-                                                    <div class="episode-date">{{ capitulo.fecha_estreno }}</div>
-                                                {% endif %}
                                             </a>
                                         </div>
                                     {% else %}
@@ -283,7 +214,6 @@
                                 </div>
                             </div>
                         {% endfor %}
-
                     {% else %}
                         <div class="alert alert-dark text-center py-4 border-secondary text-muted">
                             No hay temporadas registradas para esta serie.
@@ -294,23 +224,41 @@
         </div>
     </div>
 
-    <!-- Menú inferior móvil -->
+    <!-- Menú Inferior Móvil -->
     <div class="mobile-bottom-nav">
         <a href="{{ url_for('index') }}" class="mobile-nav-item">
             <i class="bi bi-house-door-fill"></i> Inicio
         </a>
         <a href="{{ url_for('series') }}" class="mobile-nav-item active">
-            <i class="bi bi-tv"></i> Series
+            <i class="bi bi-tv-fill"></i> Series
         </a>
-        <a href="#" class="mobile-nav-item">
+        <button type="button" class="mobile-nav-item" data-bs-toggle="modal" data-bs-target="#searchModal">
             <i class="bi bi-search"></i> Buscar
-        </a>
-        <a href="#" class="mobile-nav-item">
-            <i class="bi bi-bookmark"></i> Mi Lista
-        </a>
+        </button>
     </div>
 
-    <!-- Footer -->
+    <!-- Modal de Búsqueda Móvil -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered px-3">
+            <div class="modal-content modal-search-content rounded-4 p-2">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fs-6 fw-bold text-white" id="searchModalLabel">Buscar Película o Serie</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('buscar') }}" method="GET">
+                        <div class="input-group">
+                            <input type="search" name="q" class="form-control bg-dark text-white border-secondary rounded-start-pill px-3" placeholder="Escribe el nombre..." required autofocus>
+                            <button class="btn btn-danger rounded-end-pill px-4" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <p class="mb-1 fw-bold text-white">RETROMEDIA STREAMING</p>
@@ -321,15 +269,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function cambiarTemporada(temporadaId) {
-            // Ocultar todas las temporadas
-            const contenedores = document.querySelectorAll('.season-container');
-            contenedores.forEach(container => container.classList.add('d-none'));
-
-            // Mostrar la temporada seleccionada
+            document.querySelectorAll('.season-container').forEach(c => c.classList.add('d-none'));
             const temporadaSeleccionada = document.getElementById('season-' + temporadaId);
-            if (temporadaSeleccionada) {
-                temporadaSeleccionada.classList.remove('d-none');
-            }
+            if (temporadaSeleccionada) temporadaSeleccionada.classList.remove('d-none');
         }
     </script>
 </body>
