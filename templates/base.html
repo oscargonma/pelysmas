@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retromedia - Streaming</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #0b0b0b; color: #ffffff; padding-bottom: 70px; } /* Espacio para menú móvil */
+        .navbar-brand { color: #dc3545; font-weight: 900; letter-spacing: 1px; }
+        .card { background-color: #161616; border: none; transition: transform 0.2s; }
+        .card:hover { transform: scale(1.03); }
+        .card-img-top { height: 260px; object-fit: cover; border-radius: 4px; }
+        
+        /* Menú inferior móvil estilo app nativa */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #121212;
+            border-top: 1px solid #222;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+        @media (max-width: 768px) {
+            .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; }
+        }
+        .mobile-nav-item { color: #888; text-align: center; text-decoration: none; font-size: 0.75rem; }
+        .mobile-nav-item.active, .mobile-nav-item:hover { color: #dc3545; }
+        .mobile-nav-item i { display: block; font-size: 1.25rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-dark bg-black shadow-sm px-3 mb-4">
+        <a class="navbar-brand fs-4" href="{{ url_for('index') }}">RETROMEDIA</a>
+        <div class="d-none d-md-flex gap-3 align-items-center">
+            <a href="{{ url_for('index') }}" class="text-white text-decoration-none">Películas</a>
+            <a href="{{ url_for('series') }}" class="text-white text-decoration-none">Series</a>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container my-3">
+        <h3 class="mb-4 fw-bold">Películas Recientes</h3>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
+            {% for pelicula in peliculas %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <a href="{{ url_for('detalle_pelicula', pelicula_id=pelicula.id) }}">
+                            <img src="{{ pelicula.poster_url }}" class="card-img-top" alt="{{ pelicula.titulo }}">
+                        </a>
+                        <div class="card-body p-2 d-flex flex-column">
+                            <h6 class="card-title text-truncate text-white mb-1" title="{{ pelicula.titulo }}">{{ pelicula.titulo }}</h6>
+                            <small class="text-muted mb-2">{{ pelicula.anio_solo }}</small>
+                            <a href="{{ url_for('detalle_pelicula', pelicula_id=pelicula.id) }}" class="btn btn-sm btn-danger mt-auto">Ver ahora</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Menú inferior móvil (Visible solo en pantallas pequeñas como en tu captura) -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('index') }}" class="mobile-nav-item active">
+            <i class="bi bi-house-door-fill"></i> Inicio
+        </a>
+        <a href="{{ url_for('series') }}" class="mobile-nav-item">
+            <i class="bi bi-tv"></i> Series
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-search"></i> Buscar
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-bookmark"></i> Mi Lista
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

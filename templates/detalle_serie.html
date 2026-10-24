@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ serie.titulo }} - Retromedia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #080808; color: #fff; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 70px; }
+        .navbar { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .navbar-brand { color: #dc3545; font-weight: 900; letter-spacing: 1px; }
+
+        .backdrop-section {
+            position: relative;
+            background: linear-gradient(to bottom, rgba(8,8,8,0.85), rgba(8,8,8,0.98)), url('{{ serie.backdrop_url or serie.backdrop or serie.poster_url }}');
+            background-size: cover;
+            background-position: center;
+            flex: 1;
+            padding-bottom: 60px;
+        }
+        .poster-detalles {
+            width: 100%;
+            max-width: 240px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .meta-info {
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+            font-weight: 500;
+        }
+
+        /* Selector de Temporadas */
+        .select-season-wrapper {
+            max-width: 300px;
+        }
+        .select-season-wrapper select {
+            background-color: #ffc107;
+            color: #000000;
+            border: 1px solid #ffcd39;
+            border-radius: 6px;
+            padding: 8px 36px 8px 16px;
+            font-weight: 800;
+            cursor: pointer;
+            min-width: 160px;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .select-season-wrapper select:hover,
+        .select-season-wrapper select:focus {
+            background-color: #ffca2c;
+            color: #000000;
+            border-color: #ffe066;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
+            outline: none;
+        }
+
+        .select-season-wrapper select.form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23000000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        }
+
+        .select-season-wrapper select option {
+            background-color: #161a23;
+            color: #ffffff;
+        }
+
+        /* Tarjeta de Episodio estilo Cuevana */
+        .episode-card {
+            background-color: transparent;
+            text-decoration: none;
+            color: #fff;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+        .episode-card:hover {
+            transform: translateY(-4px);
+            color: #fff;
+        }
+        .episode-thumbnail-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #181818;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .episode-thumbnail-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+        .episode-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: #0d6efd;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .episode-play-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .episode-card:hover .episode-play-overlay {
+            opacity: 1;
+        }
+        .play-icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.2rem;
+            padding-left: 3px;
+        }
+        .episode-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 8px;
+            margin-bottom: 2px;
+            color: #3b82f6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .episode-card:hover .episode-title {
+            color: #60a5fa;
+        }
+        .episode-date {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        /* Menú inferior móvil */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background-color: #121212;
+            border-top: 1px solid #222;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+        @media (max-width: 768px) {
+            .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; }
+        }
+        .mobile-nav-item { color: #888; text-align: center; text-decoration: none; font-size: 0.75rem; }
+        .mobile-nav-item.active, .mobile-nav-item:hover { color: #dc3545; }
+        .mobile-nav-item i { display: block; font-size: 1.25rem; }
+
+        footer { background-color: #050505; border-top: 1px solid #1a1a1a; color: #777; padding: 25px 0; text-align: center; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-dark bg-black px-3">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="{{ url_for('index') }}">🎬 RETROMEDIA</a>
+            <div class="d-none d-md-flex gap-4 align-items-center">
+                <a href="{{ url_for('index') }}" class="text-white text-decoration-none">Películas</a>
+                <a href="{{ url_for('series') }}" class="text-white text-decoration-none">Series</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal con Backdrop -->
+    <div class="backdrop-section pt-4">
+        <div class="container">
+            <a href="{{ url_for('series') }}" class="btn btn-outline-light btn-sm mb-4 rounded-pill px-3">← Volver a Series</a>
+
+            <!-- Metadatos de la Serie -->
+            <div class="row align-items-center mb-5">
+                <div class="col-md-3 col-lg-2 text-center text-md-start mb-3 mb-md-0">
+                    <img src="{{ serie.poster_url }}" class="poster-detalles" alt="{{ serie.titulo }}">
+                </div>
+                <div class="col-md-9 col-lg-10">
+                    <h1 class="fw-bold display-5 text-white mb-2" style="text-shadow: 0 2px 6px rgba(0,0,0,0.8);">{{ serie.titulo }}</h1>
+                    
+                    <div class="d-flex flex-wrap gap-3 align-items-center mb-3 meta-info fs-6">
+                        {% if serie.calificacion %}
+                            <span class="badge bg-warning text-dark fw-bold px-2 py-1">⭐ {{ serie.calificacion }}</span>
+                        {% endif %}
+                        {% if serie.anio %}
+                            <span><i class="bi bi-calendar-event me-1"></i> {{ serie.anio }}</span>
+                        {% endif %}
+                        {% if serie.genero %}
+                            <span><i class="bi bi-film me-1"></i> {{ serie.genero }}</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="lead text-light fs-6" style="line-height: 1.6; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">
+                        {{ serie.sinopsis or 'Sin sinopsis disponible para esta serie.' }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Selector de Temporadas y Grid de Capítulos estilo Cuevana -->
+            <div class="row">
+                <div class="col-12">
+                    {% if serie.temporadas %}
+                        <!-- Header del Selector -->
+                        <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+                            <span class="fw-bold text-white fs-5">Selector Temporada</span>
+                            <div class="select-season-wrapper">
+                                <select class="form-select" id="seasonSelect" onchange="cambiarTemporada(this.value)">
+                                    {% for temporada in serie.temporadas %}
+                                        <option value="{{ temporada.id }}" {% if loop.first %}selected{% endif %}>
+                                            Temporada {{ temporada.numero }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Contenedores de Episodios por Temporada -->
+                        {% for temporada in serie.temporadas %}
+                            <div class="season-container {% if not loop.first %}d-none{% endif %}" id="season-{{ temporada.id }}">
+                                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+                                    {% for capitulo in temporada.capitulos %}
+                                        <div class="col">
+                                            <a href="{{ url_for('ver_capitulo', capitulo_id=capitulo.id) }}" class="episode-card">
+                                                <div class="episode-thumbnail-wrapper">
+                                                    <!-- Lógica condicional estricta para resolver URLs de TMDB o Fallback de Serie -->
+                                                    {% if capitulo.backdrop and capitulo.backdrop != None and capitulo.backdrop != '' %}
+                                                        {% if capitulo.backdrop.startswith('http') %}
+                                                            <img src="{{ capitulo.backdrop }}" alt="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                        {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{ capitulo.backdrop }}" alt="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                        {% endif %}
+                                                    {% elif serie.backdrop_url or serie.backdrop %}
+                                                        {% set bg_serie = serie.backdrop_url or serie.backdrop %}
+                                                        {% if bg_serie.startswith('http') %}
+                                                            <img src="{{ bg_serie }}" alt="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                        {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{ bg_serie }}" alt="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <img src="{{ serie.poster_url }}" alt="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                    {% endif %}
+
+                                                    <div class="episode-badge">{{ temporada.numero }}x{{ capitulo.numero }}</div>
+                                                    <div class="episode-play-overlay">
+                                                        <div class="play-icon-circle">
+                                                            <i class="bi bi-play-fill"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="episode-title" title="{{ capitulo.titulo or 'Episodio ' ~ capitulo.numero }}">
+                                                    Episodio {{ capitulo.numero }} ({{ temporada.numero }}x{{ capitulo.numero }})
+                                                </div>
+                                                {% if capitulo.fecha_estreno %}
+                                                    <div class="episode-date">{{ capitulo.fecha_estreno }}</div>
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <div class="col-12">
+                                            <div class="alert alert-dark text-center py-4 border-secondary text-muted">
+                                                No hay capítulos registrados en esta temporada.
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    {% else %}
+                        <div class="alert alert-dark text-center py-4 border-secondary text-muted">
+                            No hay temporadas registradas para esta serie.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú inferior móvil -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('index') }}" class="mobile-nav-item">
+            <i class="bi bi-house-door-fill"></i> Inicio
+        </a>
+        <a href="{{ url_for('series') }}" class="mobile-nav-item active">
+            <i class="bi bi-tv"></i> Series
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-search"></i> Buscar
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-bookmark"></i> Mi Lista
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="mb-1 fw-bold text-white">RETROMEDIA STREAMING</p>
+            <p class="mb-0">Plataforma optimizada para streaming web de alta velocidad. Todos los derechos reservados © 2026.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function cambiarTemporada(temporadaId) {
+            // Ocultar todas las temporadas
+            const contenedores = document.querySelectorAll('.season-container');
+            contenedores.forEach(container => container.classList.add('d-none'));
+
+            // Mostrar la temporada seleccionada
+            const temporadaSeleccionada = document.getElementById('season-' + temporadaId);
+            if (temporadaSeleccionada) {
+                temporadaSeleccionada.classList.remove('d-none');
+            }
+        }
+    </script>
+</body>
+</html>

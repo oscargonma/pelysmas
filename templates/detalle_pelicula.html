@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pelicula.titulo }} - Retromedia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #080808; color: #fff; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 70px; }
+        .navbar { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .navbar-brand { color: #dc3545; font-weight: 900; letter-spacing: 1px; }
+
+        /* Fondo con Backdrop y capa oscura uniforme */
+        .backdrop-section {
+            position: relative;
+            background: linear-gradient(to bottom, rgba(8,8,8,0.85), rgba(8,8,8,0.98)), url('{{ pelicula.backdrop_url or pelicula.poster_url }}');
+            background-size: cover;
+            background-position: center;
+            flex: 1;
+            padding-bottom: 60px;
+        }
+        .poster-detalles {
+            width: 100%;
+            max-width: 240px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        /* Alta visibilidad para metadatos sobre fondos claros */
+        .meta-info {
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+            font-weight: 500;
+        }
+        .ratio-16x9 {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+        .ratio-16x9 iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; border: 0;
+        }
+        .server-btn { background: #1a1a1a; color: #ccc; border: 1px solid #333; font-weight: 500; }
+        .server-btn.active, .server-btn:hover { background: #dc3545; border-color: #dc3545; color: #fff; }
+
+        /* Menú inferior móvil estilo app nativa (idéntico a tu captura) */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background-color: #121212;
+            border-top: 1px solid #222;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+        @media (max-width: 768px) {
+            .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; }
+        }
+        .mobile-nav-item { color: #888; text-align: center; text-decoration: none; font-size: 0.75rem; }
+        .mobile-nav-item.active, .mobile-nav-item:hover { color: #dc3545; }
+        .mobile-nav-item i { display: block; font-size: 1.25rem; }
+
+        footer { background-color: #050505; border-top: 1px solid #1a1a1a; color: #777; padding: 25px 0; text-align: center; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Superior Integrado -->
+    <nav class="navbar navbar-dark bg-black px-3">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="{{ url_for('index') }}">🎬 RETROMEDIA</a>
+            <div class="d-none d-md-flex gap-4 align-items-center">
+                <a href="{{ url_for('index') }}" class="text-white text-decoration-none">Películas</a>
+                <a href="{{ url_for('series') }}" class="text-white text-decoration-none">Series</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenedor Principal con Ancho Simétrico -->
+    <div class="backdrop-section pt-4">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-light btn-sm mb-4 rounded-pill px-3">← Volver</a>
+
+            <!-- Sección Superior: Póster y Metadatos alineados -->
+            <div class="row align-items-center mb-5">
+                <div class="col-md-3 col-lg-2 text-center text-md-start mb-3 mb-md-0">
+                    <img src="{{ pelicula.poster_url }}" class="poster-detalles" alt="{{ pelicula.titulo }}">
+                </div>
+                <div class="col-md-9 col-lg-10">
+                    <h1 class="fw-bold display-5 text-white mb-2" style="text-shadow: 0 2px 6px rgba(0,0,0,0.8);">{{ pelicula.titulo }}</h1>
+                    
+                    <!-- Metadatos con color blanco puro y sombra -->
+                    <div class="d-flex flex-wrap gap-3 align-items-center mb-3 meta-info fs-6">
+                        {% if pelicula.calificacion %}
+                            <span class="badge bg-warning text-dark fw-bold px-2 py-1">⭐ {{ pelicula.calificacion }}</span>
+                        {% endif %}
+                        {% if pelicula.anio %}
+                            <span><i class="bi bi-calendar-event me-1"></i> {{ pelicula.anio }}</span>
+                        {% endif %}
+                        {% if pelicula.genero %}
+                            <span><i class="bi bi-film me-1"></i> {{ pelicula.genero }}</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="lead text-light fs-6" style="line-height: 1.6; text-shadow: 0 1px 3px rgba(0,0,0,0.9);">
+                        {{ pelicula.sinopsis or 'Sin sinopsis disponible para esta película.' }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sección del Reproductor alineada -->
+            {% if reproductores %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h4 class="m-0 fw-bold fs-5 text-white"><i class="bi bi-play-circle-fill text-danger me-2"></i> Opciones de Reproducción</h4>
+                    </div>
+                    
+                    <!-- Botones dinámicos para servidores y URLs -->
+                    <div class="btn-group mb-3 flex-wrap gap-2" role="group">
+                        {% for nombre_server, url_server in reproductores.items() %}
+                            <button type="button" class="btn server-btn rounded-pill px-4 {% if loop.first %}active{% endif %}" onclick="cambiarServidor('{{ url_server }}', this)">
+                                {{ nombre_server }}
+                            </button>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Iframe Embebido -->
+                    <div class="ratio-16x9 shadow-lg">
+                        <iframe id="playerFrame" src="{{ reproductores.values() | list | first }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-dark text-center py-4 border-secondary text-muted" role="alert">
+                <i class="bi bi-exclamation-circle fs-3 d-block mb-2 text-warning"></i>
+                No hay fuentes de video disponibles para esta película.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Menú inferior móvil (Visible solo en dispositivos móviles, igual a la captura) -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('index') }}" class="mobile-nav-item active">
+            <i class="bi bi-house-door-fill"></i> Inicio
+        </a>
+        <a href="{{ url_for('series') }}" class="mobile-nav-item">
+            <i class="bi bi-tv"></i> Series
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-search"></i> Buscar
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-bookmark"></i> Mi Lista
+        </a>
+    </div>
+
+    <!-- Footer Moderno -->
+    <footer>
+        <div class="container">
+            <p class="mb-1 fw-bold text-white">RETROMEDIA STREAMING</p>
+            <p class="mb-0">Plataforma optimizada para streaming web de alta velocidad. Todos los derechos reservados © 2026.</p>
+        </div>
+    </footer>
+
+    <script>
+        function cambiarServidor(url, btn) {
+            document.getElementById('playerFrame').src = url;
+            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

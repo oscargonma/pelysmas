@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retromedia - Streaming</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #0b0b0b; color: #ffffff; padding-bottom: 70px; }
+        .navbar { border-bottom: 1px solid #1a1a1a; }
+        .navbar-brand { color: #dc3545; font-weight: 900; letter-spacing: 1px; }
+        
+        /* Estilos modernos tipo tarjeta de streaming para pósters */
+        .movie-card {
+            position: relative;
+            background-color: #161616;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .movie-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(220, 53, 69, 0.25);
+            border-color: rgba(220, 53, 69, 0.4);
+        }
+        .movie-poster {
+            height: 320px;
+            object-fit: cover;
+            width: 100%;
+            transition: transform 0.5s ease;
+        }
+        .movie-card:hover .movie-poster {
+            transform: scale(1.05);
+        }
+        /* Capa oscura gradual sobre la imagen para resaltar el título */
+        .movie-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 15%, rgba(0,0,0,0.6) 60%, transparent 100%);
+            padding: 20px 12px 12px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .movie-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        .btn-play-modern {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-play-modern:hover {
+            background-color: #bb2d3b;
+            color: #fff;
+        }
+
+        /* Menú inferior móvil */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background-color: #121212;
+            border-top: 1px solid #222;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+        @media (max-width: 768px) {
+            .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; }
+        }
+        .mobile-nav-item { color: #888; text-align: center; text-decoration: none; font-size: 0.75rem; }
+        .mobile-nav-item.active, .mobile-nav-item:hover { color: #dc3545; }
+        .mobile-nav-item i { display: block; font-size: 1.25rem; }
+        
+        footer { background-color: #050505; border-top: 1px solid #1a1a1a; color: #777; padding: 25px 0; text-align: center; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar Superior -->
+    <nav class="navbar navbar-dark bg-black px-3 mb-4">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="{{ url_for('index') }}">🎬 RETROMEDIA</a>
+            <div class="d-none d-md-flex gap-4 align-items-center">
+                <a href="{{ url_for('index') }}" class="text-danger fw-bold text-decoration-none">Películas</a>
+                <a href="{{ url_for('series') }}" class="text-white text-decoration-none">Series</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <div class="container my-4">
+        <h3 class="mb-4 fw-bold">Películas Recientes</h3>
+
+        {% if peliculas %}
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4">
+                {% for pelicula in peliculas %}
+                    <div class="col">
+                        <div class="movie-card h-100">
+                            <a href="{{ url_for('detalle_pelicula', pelicula_id=pelicula.id) }}" class="text-decoration-none">
+                                <img src="{{ pelicula.poster_url }}" class="movie-poster" alt="{{ pelicula.titulo }}">
+                                <div class="movie-overlay">
+                                    <h5 class="movie-title text-truncate" title="{{ pelicula.titulo }}">{{ pelicula.titulo }}</h5>
+                                    <span class="btn-play-modern w-100 shadow-sm">
+                                        <i class="bi bi-play-fill"></i> Ver ahora
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginación -->
+            <nav aria-label="Navegación de páginas" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link bg-dark text-white border-secondary" href="{{ url_for('index', page=pagination.prev_num) if pagination.has_prev else '#' }}">Anterior</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link bg-dark text-light border-secondary">Página {{ pagination.page }} de {{ pagination.pages }}</span>
+                    </li>
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link bg-dark text-white border-secondary" href="{{ url_for('index', page=pagination.next_num) if pagination.has_next else '#' }}">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No hay películas registradas en la base de datos todavía.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Menú inferior móvil -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('index') }}" class="mobile-nav-item active">
+            <i class="bi bi-house-door-fill"></i> Inicio
+        </a>
+        <a href="{{ url_for('series') }}" class="mobile-nav-item">
+            <i class="bi bi-tv"></i> Series
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-search"></i> Buscar
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i class="bi bi-bookmark"></i> Mi Lista
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5">
+        <div class="container">
+            <p class="mb-1 fw-bold text-white">RETROMEDIA STREAMING</p>
+            <p class="mb-0">Plataforma optimizada para streaming web de alta velocidad. Todos los derechos reservados © 2026.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
