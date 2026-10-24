@@ -33,15 +33,19 @@ def load_user(user_id):
 # --- RUTA 0: Login Falso (Vista Inicial) ---
 @app.before_request
 def requerir_login():
-    # Incluimos 'ping' para que cron-job.org pueda acceder sin autenticación
+    # Incluimos 'ping' para que cron-job.org no pase por la validación de login
     rutas_libres = ['login', 'static', 'ping']
     if request.endpoint and request.endpoint not in rutas_libres:
         if not session.get('autenticado'):
+            # Si tu función de login no se llama 'login', ajusta el endpoint aquí también
             return redirect(url_for('login'))
 
-@app.route('/ping', methods=['GET', 'HEAD'])
-def ping():
-    return 'OK', 200
+@app.route('/login', methods=['GET', 'POST'])
+def login():  # <- El nombre de esta función debe coincidir con url_for('login')
+    if request.method == 'POST':
+        session['autenticado'] = True
+        return redirect(url_for('index'))
+    return render_template('login.html')
 
 @app.route('/logout')
 def logout():
