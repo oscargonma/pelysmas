@@ -30,24 +30,10 @@ def load_user(user_id):
 
 
 
+
 # --- RUTA 0: Login Falso (Vista Inicial) ---
-@app.before_request
-def requerir_login():
-    # Incluimos 'ping' para que cron-job.org no pase por la validación de login
-    rutas_libres = ['login', 'static', 'ping']
-    if request.endpoint and request.endpoint not in rutas_libres:
-        if not session.get('autenticado'):
-            # Si tu función de login no se llama 'login', ajusta el endpoint aquí también
-            return redirect(url_for('login'))
-
-# 1. Definición de la ruta para el cronjob
-@app.route('/ping', methods=['GET', 'HEAD'])
-def ping():
-    return 'OK', 200
-
-
 @app.route('/login', methods=['GET', 'POST'])
-def login():  # <- El nombre de esta función debe coincidir con url_for('login')
+def login():
     if request.method == 'POST':
         session['autenticado'] = True
         return redirect(url_for('index'))
@@ -58,13 +44,19 @@ def logout():
     session.pop('autenticado', None)
     return redirect(url_for('login'))
 
+# 1. Definición de la ruta para el cronjob
+@app.route('/ping', methods=['GET', 'HEAD'])
+def ping():
+    return 'OK', 200
+
+# Única función before_request con 'ping' incluido
 @app.before_request
 def requerir_login():
-    # Rutas libres de login (archivos estáticos y la propia vista de login)
-    rutas_libres = ['login', 'static']
+    rutas_libres = ['login', 'static', 'ping']
     if request.endpoint and request.endpoint not in rutas_libres:
         if not session.get('autenticado'):
             return redirect(url_for('login'))
+
 
 # --- RUTA 1: Inicio (Listado de Películas) ---
 @app.route('/')
