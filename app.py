@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, abort, redirect, url_for, session
+from flask import make_response
 from sqlalchemy import event
 from sqlalchemy.orm import selectinload
 from extensions import db, login_manager
@@ -47,7 +48,9 @@ def logout():
 # 1. Definición de la ruta para el cronjob
 @app.route('/ping', methods=['GET', 'HEAD'])
 def ping():
-    return 'OK', 200
+    response = make_response('OK', 200)
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    return response
 
 # Única función before_request con 'ping' incluido
 @app.before_request
@@ -107,8 +110,9 @@ def detalle_pelicula(pelicula_id):
     if pelicula.tmdb_id:
         tmdb = pelicula.tmdb_id
         reproductores["Subtitulado Opc1"] = f"https://vidsrc.sh/embed/movie/{tmdb}"
-        reproductores["Subtitulado Opc2"] = f"https://vidrock.net/movie/{tmdb}"
-        reproductores["Subtitulado Opc3"] = f"https://vidfast.vc/movie/{tmdb}"
+        reproductores["Subtitulado Opc2"] = f"https://ythd.org/embed/{tmdb}"
+        reproductores["Subtitulado Opc3"] = f"https://vidrock.net/movie/{tmdb}"
+        reproductores["Subtitulado Opc4"] = f"https://vidfast.vc/movie/{tmdb}"
         
     return render_template('detalle_pelicula.html', pelicula=pelicula, reproductores=reproductores)
 
@@ -148,8 +152,9 @@ def ver_capitulo(capitulo_id):
         t = temporada.numero
         c = capitulo.numero
         reproductores["Subtitulado Opc1"] = f"https://vidsrc.sh/embed/tv/{tmdb}/{t}/{c}"
-        reproductores["Subtitulado Opc2"] = f"https://vidrock.net/tv/{tmdb}/{t}/{c}"
-        reproductores["Subtitulado Opc3"] = f"https://vidfast.vc/tv/{tmdb}/{t}/{c}?autoPlay=true"
+        reproductores["Subtitulado Opc2"] = f"https://ythd.org/embed/tv/{tmdb}/{t}/{c}"
+        reproductores["Subtitulado Opc3"] = f"https://vidrock.net/tv/{tmdb}/{t}/{c}"
+        reproductores["Subtitulado Opc4"] = f"https://vidfast.vc/tv/{tmdb}/{t}/{c}?autoPlay=true"
 
     return render_template('ver_capitulo.html', capitulo=capitulo, temporada=temporada, serie=serie, reproductores=reproductores)
 
